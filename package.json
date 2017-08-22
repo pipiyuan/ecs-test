@@ -1,0 +1,23 @@
+{
+  "name": "pp",
+  "version": "1.0.0",
+  "description": "爬虫",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node-dev app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "koa": "^2.3.0",
+    "koa-bodyparser": "^4.2.0",
+    "koa-router": "^7.2.1",
+    "moment": "^2.18.1",
+    "mongoose": "^4.11.7",
+    "nunjucks": "^3.0.1",
+    "request": "^2.81.0"
+  },
+  "devDependencies": {}
+}

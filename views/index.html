@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>kitty</title>
+</head>
+<style>
+input {
+    -webkit-box-shadow: 0 0 0 400px #E8ECED inset!important;
+    -webkit-text-fill-color: #666666!important;
+    background-color: #fff //设置字体颜色
+}
+</style>
+
+<body>
+    <h1>Index</h1>
+    <div>
+        <button type="" onclick="getData('booklist')">获取booklist</button>
+        <button type="" onclick="getData('booktoplist')">获取book排行榜</button>
+        <button type="" onclick="getData('book')">获取文章内容</button>
+    </div>
+</body>
+<script type="text/javascript">
+    function getData(argument) {
+        fetch(argument)
+        .then(res => res.json())
+        .then(res => {
+            console.log(res.name)
+        })
+
+    }
+</script>
+</html>
