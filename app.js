@@ -156,7 +156,7 @@ async function saveArticle(){
 	  		}
   		Books.create(saveData, (err, data) => {
 			if (!err) {
-				console.log(item.name + '....................save is ok！article_process........' + list.books.length+'====='+ processing+ '......................');
+				console.log('.........' + item.name + '............save is ok！article_process........' + list.books.length+'====='+ processing+ '......................');
 			}else{
 				console.error(err);
 			}
