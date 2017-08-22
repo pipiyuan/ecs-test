@@ -1,4 +1,4 @@
-let bookTopList = {
+let booklistDesc = {
 	id: {type: Number, default: 2},
 	time: {type: Date, default: Date.now},
 	title: {type: String, default: "新书抢鲜"},
@@ -12,4 +12,4 @@ let bookTopList = {
 		labels: {type: Array},		
 	}]
 }
-module.exports = bookTopList;
+module.exports = booklistDesc;

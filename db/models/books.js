@@ -1,5 +1,5 @@
 // 模型数据结构
-let  book = {
+let  books = {
 	id: {type: Number, default: 1},
 	time: {type: Date, default: Date.now},
 	bookName: {type: String},
@@ -12,6 +12,6 @@ let  book = {
 		content: {type: String},
 	}]
 }
-module.exports = book;
+module.exports = books;
 
 

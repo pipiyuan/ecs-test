@@ -1,5 +1,5 @@
 // 模型数据结构
-let  bookList = {
+let  booklistSlide = {
 	id: {type: Number, default: 1},
 	time: {type: Date, default: Date.now},
 	title: {type: String, default: "热门小说"},
@@ -11,4 +11,4 @@ let  bookList = {
 		author: {type: String}
 	}]
 }
-module.exports = bookList;
+module.exports = booklistSlide;
