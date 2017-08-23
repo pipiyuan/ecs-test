@@ -78,13 +78,14 @@ router.get('/booklistSlide', async(ctx, next) => {
 router.get('/booklistDesc', async(ctx, next) => {
     console.log(`.....................`);
     Request(rootUrl + classify, (error, res, body) => {
-    	let data = [];
+    	let data = {};
     	let id = 1;
         if (!error && res.statusCode == 200) {
             $ = Cheerio.load(body);
             $('.book-ol-normal .book-li').each((index, value) => {
             	if (index < 20) {
-	            	data.push({
+            		let bookId = `${rootUrl}${$(value).find('.book-layout').attr('data-bid')}`;
+	            	data[bookId] = {
 	            		id: id++,
 	            		url: `${rootUrl}${$(value).find('.book-layout').attr('href')}`,
 	            		imageUrl:`${$(value).find('.book-layout img').attr('src')}`,
@@ -96,7 +97,22 @@ router.get('/booklistDesc', async(ctx, next) => {
 	            			{tag: $(value).find('.book-meta-r .red').text()},
 	            			{tag: $(value).find('.book-meta-r .blue').text()},
 	            		],
-	            	})
+	            	}
+	            	console.log(data)
+			        /*BooklistDesc.create(
+				        {
+							// time: Moment(new Date()).add('hours', 8).format('YYYY-MM-DD HH:mm:ss'),
+							books: {
+								`bookId`: data
+							}
+						},(err, data) => {
+							if (!err) {
+								console.log('save is ok！！！！！！！！！！！！！！！！')
+							}else{
+								console.error(err);
+							}
+						}
+					)*/	
 	            }
             })
 	        // console.log(BooklistDesc);
@@ -113,18 +129,6 @@ router.get('/booklistDesc', async(ctx, next) => {
 					}
 				}
 			)	*/
-	        BooklistDesc.create(
-		        {
-					time: Moment(new Date()).add('hours', 8).format('YYYY-MM-DD HH:mm:ss'),
-					books: data
-				},(err, data) => {
-					if (!err) {
-						console.log('save is ok！！！！！！！！！！！！！！！！')
-					}else{
-						console.error(err);
-					}
-				}
-			)	
         }else{
         	console.error(error)
         }
@@ -132,16 +136,31 @@ router.get('/booklistDesc', async(ctx, next) => {
     ctx.response.body = {name: 'ok'};
 });
 
-router.get('/books', async(ctx, next) => {
+router.get('/books/slide', async(ctx, next) => {
 	
-	setTimeout(saveArticle, 1000);
+	await saveArticle('slide',0);
     ctx.response.body = {name: 'ok'};
 });
 
+router.get('/books/desc', async(ctx, next) => {
+	
+	await saveArticle('desc',19);
+    ctx.response.body = {name: 'ok'};
+});
 
-async function saveArticle(){
-	let list = await BooklistSlide.findOne();
-	let processing = 0; 
+router.get('/aa', async(ctx, next) => {
+	for(let i=20; i<=25; i++){
+
+		let result = await Books.remove({id: i});
+		console.log(result.result)
+	}
+	// let data = await Books.findOne({id: 20});
+    ctx.response.body = {name: 'ok'};
+});
+
+async function saveArticle(type, id){
+	let list = type==="slide" ? await BooklistSlide.findOne() : await BooklistDesc.findOne();
+	let processing = id; 
   	console.log(`book totall ${list.books.length}`)
 
   	for(let item of list.books){
@@ -156,7 +175,7 @@ async function saveArticle(){
 	  		}
   		Books.create(saveData, (err, data) => {
 			if (!err) {
-				console.log('.........' + item.name + '............save is ok！article_process........' + list.books.length+'====='+ processing+ '......................');
+				console.log('.........' + item.name + '............save is ok！article_process........' + list.books.length+'====='+ (processing-19)+ '......................');
 			}else{
 				console.error(err);
 			}
