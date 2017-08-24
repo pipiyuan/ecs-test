@@ -10,6 +10,7 @@ const bodyParser = require('koa-bodyparser');
 const nunjucks = require('./nunjucks.js');
 const BooklistSlide = require('./db/config.js').booklistSlide;
 const BooklistDesc = require('./db/config.js').booklistDesc;
+const Booklist = require('./db/config.js').booklist;
 const Books = require('./db/config.js').books;
 // 导入controller middleware:
 // const controllers = require('./controller');
@@ -27,19 +28,33 @@ let classify = 'female'  			// 女生类小说
 router.get('/booklistSlide', async(ctx, next) => {
     console.log(`.....................`);
     Request(rootUrl + classify, (error, res, body) => {
-    	let data = [];
     	let id = 1;
         if (!error && res.statusCode == 200) {
             $ = Cheerio.load(body);
             $('.module-slide-ol .module-slide-li').each((index, value) => {
             	if (index < 20) {
-	            	data.push({
-	            		id: id++,
-	            		url: `${rootUrl}${$(value).find('.module-slide-a').attr('href')}`,
-	            		imageUrl:`${$(value).find('img').attr('src')}`,
-	            		name: $(value).find('.module-slide-caption').text(),
-	            		author: $(value).find('.module-slide-author .gray').text(),
-	            	})
+
+            		let bookItem = {
+            			id: id++,
+						time: Moment(new Date()).add('hours', 8).format('YYYY-MM-DD HH:mm:ss'),
+						type: "slide",
+						bookName: $(value).find('.module-slide-caption').text(),
+						author: $(value).find('.module-slide-author .gray').text(),
+						url: `${rootUrl}${$(value).find('.module-slide-a').attr('href')}`,
+						imageUrl: `${$(value).find('img').attr('src')}`,
+						intro: "",
+						labels: [],	
+            		}
+
+			        Booklist.create(bookItem ,(err, data) => {
+							if (!err) {
+								console.log('save is ok！！！！！！！！！！！！！！！！')
+							}else{
+								console.error(err);
+							}
+						}
+					)	
+	            	
 	            }
             })
 	        // console.log(BooklistSlide);
@@ -56,18 +71,6 @@ router.get('/booklistSlide', async(ctx, next) => {
 					}
 				}
 			)	*/
-	        BooklistSlide.create(
-		        {
-					time: Moment(new Date()).add('hours', 8).format('YYYY-MM-DD HH:mm:ss'),
-					books: data
-				},(err, data) => {
-					if (!err) {
-						console.log('save is ok！！！！！！！！！！！！！！！！')
-					}else{
-						console.error(err);
-					}
-				}
-			)	
         }else{
         	console.error(error)
         }
@@ -78,41 +81,36 @@ router.get('/booklistSlide', async(ctx, next) => {
 router.get('/booklistDesc', async(ctx, next) => {
     console.log(`.....................`);
     Request(rootUrl + classify, (error, res, body) => {
-    	let data = {};
-    	let id = 1;
+    	let id = 21;
         if (!error && res.statusCode == 200) {
             $ = Cheerio.load(body);
             $('.book-ol-normal .book-li').each((index, value) => {
             	if (index < 20) {
-            		let bookId = `${rootUrl}${$(value).find('.book-layout').attr('data-bid')}`;
-	            	data[bookId] = {
+            		// let bookId = `${rootUrl}${$(value).find('.book-layout').attr('data-bid')}`;
+	            	let bookItem = {
 	            		id: id++,
+	            		time: Moment(new Date()).add('hours', 8).format('YYYY-MM-DD HH:mm:ss'),
+	            		type: "desc",
 	            		url: `${rootUrl}${$(value).find('.book-layout').attr('href')}`,
 	            		imageUrl:`${$(value).find('.book-layout img').attr('src')}`,
-	            		name: $(value).find('.book-title').text(),
+	            		bookName: $(value).find('.book-title').text(),
 	            		author: $(value).find('.book-author').text(),
 	            		intro: $(value).find('.book-desc').text().replace("作者：", ""),
 	            		labels: [
 	            			{tag: $(value).find('.book-meta-r .gray').text()},
 	            			{tag: $(value).find('.book-meta-r .red').text()},
 	            			{tag: $(value).find('.book-meta-r .blue').text()},
-	            		],
+	            		]	
 	            	}
-	            	console.log(data)
-			        /*BooklistDesc.create(
-				        {
-							// time: Moment(new Date()).add('hours', 8).format('YYYY-MM-DD HH:mm:ss'),
-							books: {
-								`bookId`: data
-							}
-						},(err, data) => {
+	            	// console.log(data)
+			        Booklist.create(bookItem ,(err, data) => {
 							if (!err) {
 								console.log('save is ok！！！！！！！！！！！！！！！！')
 							}else{
 								console.error(err);
 							}
 						}
-					)*/	
+					)	
 	            }
             })
 	        // console.log(BooklistDesc);
@@ -136,46 +134,25 @@ router.get('/booklistDesc', async(ctx, next) => {
     ctx.response.body = {name: 'ok'};
 });
 
-router.get('/books/slide', async(ctx, next) => {
+router.get('/books', async(ctx, next) => {
 	
-	await saveArticle('slide',0);
+	await saveArticle();
     ctx.response.body = {name: 'ok'};
 });
 
-router.get('/books/desc', async(ctx, next) => {
-	
-	await saveArticle('desc',19);
-    ctx.response.body = {name: 'ok'};
-});
 
-router.get('/aa', async(ctx, next) => {
-	for(let i=20; i<=25; i++){
-
-		let result = await Books.remove({id: i});
-		console.log(result.result)
-	}
-	// let data = await Books.findOne({id: 20});
-    ctx.response.body = {name: 'ok'};
-});
-
-async function saveArticle(type, id){
-	let list = type==="slide" ? await BooklistSlide.findOne() : await BooklistDesc.findOne();
-	let processing = id; 
-  	console.log(`book totall ${list.books.length}`)
-
-  	for(let item of list.books){
+async function saveArticle(){
+	let booklists = await Booklist.find();
+	let processing = 1; 
+  	console.log(`book totall ${booklists.length}`)
+  	for(let item of booklists){
   		let saveData = {
-  				id: ++processing,
-	  			time: Moment(new Date()).add('hours', 8).format('YYYY-MM-DD HH:mm:ss'),
-	  			bookName: item.name,
-	  			author: item.author,
-	  			url: item.url,
-	  			imageUrl: item.imageUrl,
+  				id: processing++,
 	  			chapters: await getChapters(item.url)
 	  		}
   		Books.create(saveData, (err, data) => {
 			if (!err) {
-				console.log('.........' + item.name + '............save is ok！article_process........' + list.books.length+'====='+ (processing-19)+ '......................');
+				console.log('.........' + item.bookName + '............save is ok！article_process........' + booklists.length+'====='+ processing+ '......................');
 			}else{
 				console.error(err);
 			}
@@ -191,14 +168,14 @@ function getChapters(url){
 	    	let id = 1;
 	        if (!error && res.statusCode == 200) {
 	            $ = Cheerio.load(body);
-	            let i = 1;
+	            let i = 0;
 	            let chapterOvj = $('#catelogX .jsChapter');
 
 	            chapterOvj.each(async(index, value) => {
 	            	let contentId = $(value).find('a').attr('data-chapter-id');
 	            	i++;
 	            	data.push({
-	            		id: contentId,
+	            		chapterId: (i-1),
 	            		title: $(value).find('span').text(),
 	            		content: await getContent(`${url}/${contentId}`, i),
 	            	});

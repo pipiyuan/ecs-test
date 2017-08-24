@@ -5,14 +5,14 @@ const mongoose = require('mongoose');
 const config = {
     ip: '120.77.81.108',
     port: '27017',
-    database: 'test',
-    username: 'root',
-    password: '1207781108',
+    database: 'qidian',
+    username: 'Test',
+    password: '101010',
 
 }
 
 // mongoose.Promise = global.Promise;
-let URL = `mongodb://${config.username}:${config.password}@${config.ip}:${config.port}/${config.database}?authSource=admin`;
+let URL = `mongodb://${config.username}:${config.password}@${config.ip}:${config.port}/${config.database}`;
 
 // mongoose.connect(URL);
 // mongoose.connect("mongodb://120.77.81.108:27017/test");
