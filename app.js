@@ -8,12 +8,8 @@ const router = require('koa-router')();
 const bodyParser = require('koa-bodyparser');
 
 const nunjucks = require('./nunjucks.js');
-const BooklistSlide = require('./db/config.js').booklistSlide;
-const BooklistDesc = require('./db/config.js').booklistDesc;
 const Booklist = require('./db/config.js').booklist;
 const Books = require('./db/config.js').books;
-// 导入controller middleware:
-// const controllers = require('./controller');
 
 const app = new Koa();
 
@@ -25,6 +21,8 @@ router.get('/', async(ctx, next) => {
 let rootUrl = 'http://m.qidian.com/'; 
 let classify = 'female'  			// 女生类小说
 // let classify = 'male';			// 男生类小说
+
+// 获取两类 booklist
 router.get('/booklistSlide', async(ctx, next) => {
     console.log(`.....................`);
     Request(rootUrl + classify, (error, res, body) => {
@@ -32,6 +30,7 @@ router.get('/booklistSlide', async(ctx, next) => {
         if (!error && res.statusCode == 200) {
             $ = Cheerio.load(body);
             $('.module-slide-ol .module-slide-li').each((index, value) => {
+            	// 只取前20条
             	if (index < 20) {
 
             		let bookItem = {
@@ -57,20 +56,6 @@ router.get('/booklistSlide', async(ctx, next) => {
 	            	
 	            }
             })
-	        // console.log(BooklistSlide);
-	    	/*BooklistSlide.update(
-	    		{id: 1},
-		        {
-					time: Moment(new Date()).add('hours', 8).format('YYYY-MM-DD HH:mm:ss'),
-					books: data
-				},(err, data) => {
-					if (!err) {
-						console.log('update is ok！！！！！！！！！！！！！！！！')
-					}else{
-						console.error(err);
-					}
-				}
-			)	*/
         }else{
         	console.error(error)
         }
@@ -86,8 +71,7 @@ router.get('/booklistDesc', async(ctx, next) => {
             $ = Cheerio.load(body);
             $('.book-ol-normal .book-li').each((index, value) => {
             	if (index < 20) {
-            		// let bookId = `${rootUrl}${$(value).find('.book-layout').attr('data-bid')}`;
-	            	let bookItem = {
+            		let bookItem = {
 	            		id: id++,
 	            		time: Moment(new Date()).add('hours', 8).format('YYYY-MM-DD HH:mm:ss'),
 	            		type: "desc",
@@ -113,20 +97,7 @@ router.get('/booklistDesc', async(ctx, next) => {
 					)	
 	            }
             })
-	        // console.log(BooklistDesc);
-	    	/*BooklistDesc.update(
-	    		{id: 2},
-		        {
-					time: Moment(new Date()).add('hours', 8).format('YYYY-MM-DD HH:mm:ss'),
-					books: data
-				},(err, data) => {
-					if (!err) {
-						console.log('update is ok！！！！！！！！！！！！！！！！')
-					}else{
-						console.error(err);
-					}
-				}
-			)	*/
+	        
         }else{
         	console.error(error)
         }
@@ -134,8 +105,9 @@ router.get('/booklistDesc', async(ctx, next) => {
     ctx.response.body = {name: 'ok'};
 });
 
+
+// 根据 booklist 获取文章内容
 router.get('/books', async(ctx, next) => {
-	
 	await saveArticle();
     ctx.response.body = {name: 'ok'};
 });
@@ -143,7 +115,7 @@ router.get('/books', async(ctx, next) => {
 
 async function saveArticle(){
 	let booklists = await Booklist.find();
-	let processing = 1; 
+	let processing = 1;  // 创建 book id 也是存储进程数
   	console.log(`book totall ${booklists.length}`)
   	for(let item of booklists){
   		let saveData = {
@@ -161,6 +133,7 @@ async function saveArticle(){
   	console.log("全部书已存储完毕................................................................................")
 }
 
+// 获取小说章节存储
 function getChapters(url){
 	return new Promise((resolve, reject) => {
 		Request(`${url}/catalog`, (error, res, body) => {
@@ -195,6 +168,7 @@ function getChapters(url){
 	})
 }
 
+// 获取章节内容
 function getContent(url, index,){
 	return new Promise((resolve, reject) => {
 		Request(url, (error, res, body) => {
@@ -213,6 +187,7 @@ function getContent(url, index,){
 	})
 }
 
+// 去空格
 function trim(str) {
   return str.replace(/(^\s*)|(\s*$)/g, '').replace(/&nbsp;/g, '')
 }

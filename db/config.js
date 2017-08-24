@@ -11,7 +11,6 @@ const config = {
 
 }
 
-// mongoose.Promise = global.Promise;
 let URL = `mongodb://${config.username}:${config.password}@${config.ip}:${config.port}/${config.database}`;
 
 // mongoose.connect(URL);
