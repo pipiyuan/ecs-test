@@ -40,7 +40,7 @@ router.get('/booklistSlide', async(ctx, next) => {
 						bookName: $(value).find('.module-slide-caption').text(),
 						author: $(value).find('.module-slide-author .gray').text(),
 						url: `${rootUrl}${$(value).find('.module-slide-a').attr('href')}`,
-						imageUrl: `${$(value).find('img').attr('src')}`,
+						imageUrl: `https:${$(value).find('img').attr('data-src')}`,
 						intro: "",
 						labels: [],	
             		}
@@ -76,7 +76,7 @@ router.get('/booklistDesc', async(ctx, next) => {
 	            		time: Moment(new Date()).add('hours', 8).format('YYYY-MM-DD HH:mm:ss'),
 	            		type: "desc",
 	            		url: `${rootUrl}${$(value).find('.book-layout').attr('href')}`,
-	            		imageUrl:`${$(value).find('.book-layout img').attr('src')}`,
+	            		imageUrl:`http:${$(value).find('.book-layout img').attr('data-src')}`,
 	            		bookName: $(value).find('.book-title').text(),
 	            		author: $(value).find('.book-author').text(),
 	            		intro: $(value).find('.book-desc').text().replace("作者：", ""),
@@ -114,17 +114,17 @@ router.get('/books', async(ctx, next) => {
 
 
 async function saveArticle(){
-	let booklists = await Booklist.find();
+	let booklists = await Booklist.find();   // 经常遇到一次性无法 全部存储文章成功，可分少部分多次存储
 	let processing = 1;  // 创建 book id 也是存储进程数
   	console.log(`book totall ${booklists.length}`)
   	for(let item of booklists){
   		let saveData = {
-  				id: processing++,
+  				id: item.id,
 	  			chapters: await getChapters(item.url)
 	  		}
   		Books.create(saveData, (err, data) => {
 			if (!err) {
-				console.log('.........' + item.bookName + '............save is ok！article_process........' + booklists.length+'====='+ processing+ '......................');
+				console.log('.........' + item.bookName + '............save is ok！article_process........' + booklists.length+'====='+ processing++ + '......................');
 			}else{
 				console.error(err);
 			}
