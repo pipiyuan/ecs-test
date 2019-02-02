@@ -14,6 +14,7 @@ const Books = require('./db/config.js').books;
 const app = new Koa();
 
 router.get('/', async(ctx, next) => {
+	console.log(Booklist)
 	ctx.response.body = nunjucks.render('index.html');
 })
 
@@ -60,6 +61,34 @@ router.get('/booklistSlide', async(ctx, next) => {
         	console.error(error)
         }
     });
+    ctx.response.body = {name: 'ok'};
+});
+
+router.get('/booklistUpdae', async(ctx, next) => {
+    let booklists = await Booklist.find();   // 经常遇到一次性无法 全部存储文章成功，可分少部分多次存储
+  	console.log(`book totall ${booklists.length}`)
+  	for(let item of booklists){
+	    Request(item.url, async (error, res, body) => {
+	        if (!error && res.statusCode == 200) {
+	            $ = Cheerio.load(body);
+	            let num = Math.ceil(Math.random()*5*100)/100;
+	            	num = num < 1 ? (num+2) : num;
+	            let bookIdArr = [Math.ceil(Math.random()*100/4), Math.ceil(Math.random()*100/4), Math.ceil(Math.random()*100/4)];
+	            let saveData = {
+		  			// intro: $('#bookSummary content').text(),
+		  			// score: num,
+		  			recommendBook: bookIdArr
+		  			// labels: [{tag: '连载'}, {tag: (Math.ceil(Math.random()*20)+'万字')}] 
+		  		}
+	            
+  				await Booklist.update({id: item.id}, saveData);
+		        
+	        }else{
+	        	console.error(error)
+	        }
+	    });
+  	}
+  	console.log('ok......')
     ctx.response.body = {name: 'ok'};
 });
 
@@ -114,7 +143,7 @@ router.get('/books', async(ctx, next) => {
 
 
 async function saveArticle(){
-	let booklists = await Booklist.find();   // 经常遇到一次性无法 全部存储文章成功，可分少部分多次存储
+	let booklists = await Booklist.find({id:'desc'});   // 经常遇到一次性无法 全部存储文章成功，可分少部分多次存储
 	let processing = 1;  // 创建 book id 也是存储进程数
   	console.log(`book totall ${booklists.length}`)
   	for(let item of booklists){

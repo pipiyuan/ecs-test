@@ -7,6 +7,8 @@ let booklist = {
 	url: {type: String},
 	imageUrl: {type: String},
 	intro: {type: String, default: ""},
+	score: {type: Number},
+	recommendBook: {type: Array, default: []},
 	labels: {type: Array, default: []},		
 }
 module.exports = booklist;

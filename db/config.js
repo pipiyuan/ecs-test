@@ -7,7 +7,7 @@ const config = {
     port: '27017',
     database: 'qidian',
     username: 'Test',
-    password: '',   //  注释了
+    password: '101010',   //  注释了
 
 }
 
